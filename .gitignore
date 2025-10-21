@@ -1,0 +1,66 @@
+# -------------------------
+# JetBrains IDE
+# -------------------------
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+*.whl
+pip-wheel-metadata/
+
+# -------------------------
+# VS Code
+# -------------------------
+.vscode/
+
+# -------------------------
+# Logs and databases
+# -------------------------
+*.log
+*.sql
+*.sqlite
+*.db
+
+# -------------------------
+# OS generated files
+# -------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -------------------------
+# Temporary files
+# -------------------------
+*.tmp
+*.bak
+*.swp
+
+# -------------------------
+# Environment variables
+# -------------------------
+
+.env
