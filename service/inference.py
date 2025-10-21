@@ -156,6 +156,9 @@ class InferenceProcessor:
         await asyncio.to_thread(lambda: redis_conn.set(key, json.dumps(result), ex=180))
 
 
+processor = InferenceProcessor()
+
+
 
 
 
