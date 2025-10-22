@@ -15,3 +15,15 @@ mysql_pool = mysql.connector.pooling.MySQLConnectionPool(
     password=os.getenv("MYSQL_PASSWORD"),
     database=os.getenv("MYSQL_DATABASE"),
 )
+
+# 创建
+# 创建Mysql连接池
+mysql_user_pool = mysql.connector.pooling.MySQLConnectionPool(
+    pool_name="mysql_pool",
+    pool_size=int(os.getenv("MYSQL_POOL_SIZE")),
+    host=os.getenv("MYSQL_HOST"),
+    port=os.getenv("MYSQL_PORT"),
+    user=os.getenv("MYSQL_USER"),
+    password=os.getenv("MYSQL_PASSWORD"),
+    database=os.getenv("USER_DATABASE"),
+)

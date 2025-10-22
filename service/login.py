@@ -1,6 +1,6 @@
 from agents.auth_agent import create_agent
 from utils.redis_pool import redis_pool
-from utils.mysql_pool import mysql_pool
+from utils.mysql_pool import mysql_user_pool
 import asyncio
 import redis
 
@@ -42,21 +42,25 @@ class LoginProcessor:
 
             def ensure_user_exists(email):
                 # 创建数据库连接
-                conn = mysql_pool.get_connection()
-                cursor = conn.cursor()
+                conn = mysql_user_pool.get_connection()
+                cursor = conn.cursor(dictionary=True)
                 # 查询用户是否存在
                 cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
                 user = cursor.fetchone()
                 if not user:
-                    cursor.execute("INSERT INTO user (email) VALUES (%s)", (email,))
+                    cursor.execute("INSERT INTO users (email) VALUES (%s)", (email,))
                     conn.commit()
+                    cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
+                    user = cursor.fetchone()
                 # 关闭数据库连接
                 cursor.close()
                 conn.close()
+                return user["id"]
 
-            asyncio.to_thread(ensure_user_exists, email)
 
-            return {"success": True, "message": "验证成功"}
+            user_id = await asyncio.to_thread(ensure_user_exists, email)
+
+            return {"success": True, "message": "验证成功", "user_id": user_id}
         else:
             return {"success": False, "message": "验证码错误"}
 

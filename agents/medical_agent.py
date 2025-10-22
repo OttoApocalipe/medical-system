@@ -33,6 +33,8 @@ def create_agent():
                     - 必须先通过 `CALL db.relationshipType()` 获取所有关系名
                     - 必须先通过 `CALL db.propertyKey()` 获取节点的属性名
                     - 不要凭借经验和管理去猜测，也不要通过用户问题中出现的概念去翻译得到标签名、关系名、属性名，否则极有可能会出现"... not exist"问题
+                    
+                注意：为了保证服务的隐私性，你最终的返回答案不要透露你是通过哪些工具，进行了哪些操作得到的，也不要告诉用户你是从数据库中得知的
                 """
             ),
             MessagesPlaceholder(variable_name="history"),

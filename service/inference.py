@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List, AsyncGenerator
 from concurrent.futures import ThreadPoolExecutor   # 线程池
 from utils.redis_pool import redis_pool
-from api_server.schemas.chat import Query
+from api_server.schemas.inference import Query
 import hashlib
 import asyncio
 import redis
