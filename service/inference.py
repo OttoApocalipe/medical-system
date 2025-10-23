@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List, AsyncGenerator
 from concurrent.futures import ThreadPoolExecutor   # 线程池
 from utils.redis_pool import redis_pool
+from utils.mysql_pool import mysql_user_pool
 from api_server.schemas.inference import Query
 import hashlib
 import asyncio
@@ -71,6 +72,48 @@ class InferenceProcessor:
     def __init__(self):
         self.agent = create_agent()
 
+    # 会话归属验证
+    async def _verify_session_owner(self, user_id: int, session_id: str) -> dict:
+        """
+        验证会话是否属于当前用
+        :param user_id: 用户ID
+        :param session_id: 会话ID
+        :return: {"success": bool, "message": str}
+        """
+        def sync_verify():
+            """
+            同步Mysql查询(避免阻塞时间循环)
+            """
+            conn = mysql_user_pool.get_connection()
+            cursor = conn.cursor(dictionary=True)
+            try:
+                # 查session表：session_uuid是否关联当前user_id
+                cursor.execute("""
+                    SELECT 1 FROM sessions
+                    WHERE session_uuid = %s AND user_id = %s
+                """, (session_id, user_id))
+                if cursor.fetchone():
+                    return {"success": True, "message": "会话归属验证通过"}
+                else:
+                    return {"success": False, "message": "会话不属于当前用户"}
+            except Exception as e:
+                # 捕获Mysql异常，返回错误信息
+                return {"success": False, "message": f"数据库查询失败: {str(e)}"}
+            finally:
+                cursor.close()
+                conn.close()
+
+        return await asyncio.to_thread(sync_verify)
+
+    async def check_session_owner(self, user_id: int, session_id: str) -> dict:
+        """
+        公开方法
+        :param user_id: 用户ID
+        :param session_id: 会话ID
+        :return: {"success": bool, "message": str}
+        """
+        return await self._verify_session_owner(user_id, session_id)
+
     def _inference(self, query: Query):
         config = {"configurable": {"session_id": query.session_id}}
         result = self.agent.invoke({"input": query.question}, config)
@@ -120,46 +163,7 @@ class InferenceProcessor:
         except RuntimeError:
             return asyncio.run(self.inference_with_cache_async(query))
 
-    async def stream(self, query: Query) -> AsyncGenerator[dict, None]:
-        start_time = time.time()
-        hash_num = hashlib.sha256(query.question.encode()).hexdigest()
-        key = f"{query.session_id}:{hash_num}"
-
-        # 检查缓存
-        cache = await asyncio.to_thread(redis_conn.get, key)
-        if cache:
-            await asyncio.to_thread(lambda: redis_conn.expire(key, 180))
-            cached_result = json.loads(cache.decode())
-            cached_result["from_cache"] = True
-            yield cached_result
-            return
-
-        # 流式推理
-        generated_texts = []
-        async for chunk in self.agent.astream(
-                {"input": query.question},
-                {"configurable": {"session_id": query.session_id}}
-        ):
-            text = getattr(chunk, "content", None) or getattr(chunk, "output", None) or str(chunk)
-            if text:
-                generated_texts.append(text)
-                yield {"chunk": text}
-
-        # 缓存完整结果
-        result = {
-            "input": query.question,
-            "output": "".join(generated_texts),
-            "history": [],
-            "from_cache": False,
-            "time_cost_ms": int((time.time() - start_time) * 1000)
-        }
-        await asyncio.to_thread(lambda: redis_conn.set(key, json.dumps(result), ex=180))
-
 
 processor = InferenceProcessor()
-
-
-
-
 
 

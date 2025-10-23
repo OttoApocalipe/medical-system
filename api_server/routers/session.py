@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from api_server.schemas.session import (
     SessionsListRequest, CreateSessionRequest,
     SessionsListResponse, CreateSessionResponse
 )
 from utils.mysql_pool import mysql_user_pool
+from api_server.dependencies import get_current_user
 import uuid
 
 router = APIRouter(prefix="/api/sessions", tags=["sessions"])
@@ -11,8 +12,11 @@ router = APIRouter(prefix="/api/sessions", tags=["sessions"])
 
 # 获取用户的所有 sessions
 @router.post("/list", response_model=SessionsListResponse)
-async def get_sessions(request: SessionsListRequest):
-    user_id = request.user_id
+async def get_sessions(
+        request: SessionsListRequest,
+        current_user: dict = Depends(get_current_user)
+):
+    user_id = current_user["user_id"]
     conn = mysql_user_pool.get_connection()
     cursor = conn.cursor(dictionary=True)
     try:
@@ -25,7 +29,7 @@ async def get_sessions(request: SessionsListRequest):
             FROM sessions
             WHERE user_id = %s
             ORDER BY updated_at DESC
-        """, (request.user_id,))
+        """, (user_id,))
         sessions = cursor.fetchall()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"数据库查询失败: {e}")
@@ -41,8 +45,11 @@ async def get_sessions(request: SessionsListRequest):
 
 # 创建 session
 @router.post("/new", response_model=CreateSessionResponse)
-async def create_session(request: CreateSessionRequest):
-    user_id = request.user_id
+async def create_session(
+        request: CreateSessionRequest,
+        current_user: dict = Depends(get_current_user)
+):
+    user_id = current_user["user_id"]
     title = request.title or "新对话"
     session_uuid = str(uuid.uuid4())
     conn = mysql_user_pool.get_connection()

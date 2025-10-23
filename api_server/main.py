@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query as FastAPIQuery, HTTPException, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from api_server.routers import login, inference, history, session

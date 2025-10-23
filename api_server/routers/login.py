@@ -18,6 +18,7 @@ async def send_code(req: SendCodeRequest):
 async def authenticate(req: AuthRequest):
     result = await login_processor.authenticate(req.email, req.code)
     if result["success"]:
+        # print(result)     # 调试时查看响应体
         return result
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["message"])

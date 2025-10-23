@@ -1,21 +1,23 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
+from api_server.schemas.status import ResponseStatus
 
 
 # ---------- 请求体Schema ----------
+# 获取所有会话列表：无需参数（user_id从JWT中获取）
 class SessionsListRequest(BaseModel):
-    user_id: int
+    pass
 
 
+# 创建新会话：user_id从JWT中获取）
 class CreateSessionRequest(BaseModel):
-    user_id: int
-    title: Optional[str] = None  # 可选标题
+    title: Optional[str] = "新对话"  # 可选标题
 
 
 # ---------- 响应体Schema ----------
 class MetaInfo(BaseModel):
-    status: str  # 响应状态，如 success 或 error
+    status: ResponseStatus  # 响应状态，如 success 或 error
 
 
 class SessionItem(BaseModel):
