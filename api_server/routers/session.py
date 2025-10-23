@@ -1,5 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from api_server.schemas.session import UserRequest, CreateSessionRequest
+from api_server.schemas.session import (
+    SessionsListRequest, CreateSessionRequest,
+    SessionsListResponse, CreateSessionResponse
+)
 from utils.mysql_pool import mysql_user_pool
 import uuid
 
@@ -7,8 +10,8 @@ router = APIRouter(prefix="/api/sessions", tags=["sessions"])
 
 
 # 获取用户的所有 sessions
-@router.post("/list")
-async def get_sessions(request: UserRequest):
+@router.post("/list", response_model=SessionsListResponse)
+async def get_sessions(request: SessionsListRequest):
     user_id = request.user_id
     conn = mysql_user_pool.get_connection()
     cursor = conn.cursor(dictionary=True)
@@ -37,7 +40,7 @@ async def get_sessions(request: UserRequest):
 
 
 # 创建 session
-@router.post("/new")
+@router.post("/new", response_model=CreateSessionResponse)
 async def create_session(request: CreateSessionRequest):
     user_id = request.user_id
     title = request.title or "新对话"

@@ -1,8 +1,11 @@
 from agents.auth_agent import create_agent
 from utils.redis_pool import redis_pool
 from utils.mysql_pool import mysql_user_pool
+from tools.email_tool import email_tool
 import asyncio
 import redis
+import random
+import string
 
 # 创建redis连接
 redis_conn = redis.StrictRedis(connection_pool=redis_pool)
@@ -12,13 +15,20 @@ class LoginProcessor:
     def __init__(self):
         self.agent = create_agent()
 
+    def _generate_code(self, length: int = 6) -> str:
+        """生成验证码"""
+        alphabet = string.ascii_uppercase + string.digits
+        return "".join(random.choice(alphabet) for _ in range(length))
+
     async def send_code(self, email: str):
         """
         发送验证码
         :param email: 邮箱
         :return: 验证码
         """
-        query = f"请向邮箱{email}发送验证码"
+        code = self._generate_code()
+        query = f"请向邮箱{email}发送验证码，验证码为：{code}（记住传入全部的三个参数，包括dest_email，subject，content）"
+        print(query)
         result = await self.agent.ainvoke({"input": query})
         await asyncio.to_thread(redis_conn.set, email, str(result["output"]), ex=180)
         return result["output"]

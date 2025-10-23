@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from datetime import datetime
 from service.inference import processor as inference_processor
-from api_server.schemas.inference import InferenceRequest
+from api_server.schemas.inference import InferenceRequest, InferenceResponse
 import asyncio
 import time
 import os
@@ -9,7 +9,7 @@ import os
 router = APIRouter(prefix="/api", tags=["inference"])
 
 
-@router.post("/inference")
+@router.post("/inference", response_model=InferenceResponse)
 async def inference(request: InferenceRequest):
     start_time = time.time()
     tasks = [inference_processor.inference_with_cache_async(query) for query in request.queries]

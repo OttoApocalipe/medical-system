@@ -6,20 +6,20 @@ import asyncio
 
 class EmailArgs(BaseModel):
     # 收件人邮箱：必填
-    dest_email: list[str] = Field(..., description="收件人邮箱列表(至少包含一个收件人)", example=["<EMAIL>", "<EMAIL>"])
+    dest_email: list[str] = Field(..., description="收件人邮箱列表(至少包含一个收件人，必填)", example=["<EMAIL>", "<EMAIL>"])
     # 邮件主题：必填
-    subject: str = Field(..., description="邮件主题")
+    subject: str = Field(..., description="邮件主题，必填")
     # 邮件内容：必填
-    content: str = Field(..., description="邮件内容")
+    content: str = Field(..., description="邮件内容，必填")
 
 
 @tool(args_schema=EmailArgs)
 def email_tool(dest_email: list[str], subject: str, content: str) -> str:
     """
     发送邮件，返回结果
-    :param dest_email: 收件人邮箱列表(至少包含一个收件人)
-    :param subject: 邮件主题
-    :param content: 邮件内容
+    :param dest_email: 收件人邮箱列表(至少包含一个收件人，必填)
+    :param subject: 邮件主题(必填)
+    :param content: 邮件内容(必填)
     """
     async def run():
         async with Client("http://localhost:8001/sse") as sse:
