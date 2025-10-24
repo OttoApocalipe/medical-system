@@ -44,7 +44,6 @@ async def inference(
         "meta": {
             "status": "success",
             "timestamp": datetime.now().isoformat(),
-            
             "model": os.getenv("LLM_MODEL_NAME"),
             "total_queries": len(results),
             "from_cache_count": from_cache_count,
