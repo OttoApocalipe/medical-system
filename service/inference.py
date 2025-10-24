@@ -72,6 +72,47 @@ class InferenceProcessor:
     def __init__(self):
         self.agent = create_agent()
 
+    async def sync_get_user_email(self, session_id: str) -> str:
+        """
+        根据会话ID获取用户邮箱
+        :param session_id: 会话UUID
+        :return: 用户邮箱（若查询失败返回空字符串）
+        """
+        def sync_get_email():
+            conn = None
+            cursor = None
+            try:
+                conn = mysql_user_pool.get_connection()
+                cursor = conn.cursor(dictionary=True)
+
+                # 查询会话关联的user_id
+                cursor.execute("""
+                    SELECT user_id FROM sessions
+                    WHERE session_uuid = %s
+                    LIMIT 1
+                """, (session_id,))
+                user_id = cursor.fetchone()["user_id"]
+
+                # 查询用户邮箱
+                cursor.execute("""
+                    SELECT email FROM users
+                    WHERE id = %s
+                    LIMIT 1
+                """, (user_id,))
+                email = cursor.fetchone()["email"]
+                return email
+            except Exception as e:
+                print(f"数据库查询失败: {str(e)}")
+                return "无"
+            finally:
+                if cursor:
+                    cursor.close()
+                if conn:
+                    conn.close()
+
+        # 创建线程并执行同步函数
+        return await asyncio.to_thread(sync_get_email)
+
     # 会话归属验证
     async def _verify_session_owner(self, user_id: int, session_id: str) -> dict:
         """
@@ -122,7 +163,9 @@ class InferenceProcessor:
     # 异步推理
     async def _inference_async(self, query: Query):
         config = {"configurable": {"session_id": query.session_id}}
-        result = await self.agent.ainvoke({"input": query.question}, config)
+        email = await self.sync_get_user_email(query.session_id)
+        print("用户邮箱", email)
+        result = await self.agent.ainvoke({"input": query.question, "email": email}, config)
         return result
 
     async def inference_with_cache_async(self, query: Query):

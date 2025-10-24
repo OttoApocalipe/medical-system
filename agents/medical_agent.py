@@ -1,6 +1,7 @@
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from tools.sql_tool import sql_tool
 from tools.neo4j_tool import neo4j_tool
+from tools.email_tool import email_tool
 from model.model_manager import ModelManager
 from utils.history_manager import get_history_manager
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -13,15 +14,15 @@ def create_agent():
     model_manager = ModelManager()
     llm = model_manager.get_llm()
     # 规定工具
-    tools = [neo4j_tool, sql_tool]
+    tools = [neo4j_tool, sql_tool, email_tool]
     # 定义提示词
     prompt = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
                 """
-                你是一个医疗知识智能体，你有如下工具：neo4j_tool, sql_tool
-                当用户问到医学（包括但不限于疾病、症状等）相关问题时,必须使用这些工具并按照如下流程进行使用，
+                你是一个医疗知识智能体，你有如下工具：neo4j_tool, sql_tool, email_tool
+                当用户问到医学（包括但不限于疾病、症状等）相关问题时,必须按照如下流程进行使用，
                 1. 使用 neo4j_tool 在图数据库中进行查询
                     - 所查询的数据库为医学知识相关数据库，包含各种疾病、药物、症状
                     - 必须先通过 `CALL db.labels()` 获取所有节点标签名
@@ -35,10 +36,13 @@ def create_agent():
                     - 不要凭借经验和惯例去猜测，也不要通过用户提问中出现的概念去翻译得到表名、属性名等，否则极有可能会出现"... not exist"或者"Unknown column"问题
                     - 查询Mysql数据库后无法查询到数据的时候，尝试其他工具
                 3. 查询到结果后，对结果进行详适当的阐述和扩展描述，过滤掉明显的错误信息，用尽可能充分的信息返回给用户
-                4. 当使用工具后未能得到用户需要的结果，请返回“我的知识还不足以回答您的问题，请寻求更专业的帮助”
+                4. 当使用所有查询工具后仍然未能得到用户需要的结果，请返回“我的知识还不足以回答您的问题，请寻求更专业的帮助”
+                5. 如果用户还要求发送分析报表，请向用户的邮箱发送你的分析报表，用户邮箱为 {email}
+                
 
                 注意：
                 1. 为了保证服务的隐私性，你最终的返回答案不要透露你是通过哪些工具，进行了哪些操作得到的，也不要告诉用户你是从数据库中得知的
+                2. 务必使用查询工具，不要凭借自己的通用知识回答
                 """
             ),
             MessagesPlaceholder(variable_name="history"),
