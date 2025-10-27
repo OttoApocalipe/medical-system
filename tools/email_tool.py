@@ -1,7 +1,13 @@
 from pydantic import BaseModel, Field   # 用于输入参数校验
 from langchain.tools import tool    # 用于装饰智能体工具
 from fastmcp import Client
+from dotenv import load_dotenv
 import asyncio
+import os
+
+# 加载环境变量
+load_dotenv()
+mcp_url = os.getenv("MCP_URL")
 
 
 class EmailArgs(BaseModel):
@@ -22,7 +28,7 @@ def email_tool(dest_email: list[str], subject: str, content: str) -> str:
     :param content: 邮件内容(必填)
     """
     async def run():
-        async with Client("http://localhost:8001/sse") as sse:
+        async with Client(mcp_url) as sse:
             res = await sse.call_tool("email_tool", {"dest_email": dest_email, "subject": subject, "content": content})
             return res
     return asyncio.run(run())

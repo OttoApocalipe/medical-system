@@ -29,7 +29,7 @@ def create_agent():
                     - 必须先通过 `CALL db.relationshipType()` 获取所有关系名
                     - 必须先通过 `CALL db.propertyKey()` 获取节点的属性名
                     - 不要凭借经验和管理去猜测，也不要通过用户问题中出现的概念去翻译得到标签名、关系名、属性名，否则极有可能会出现"... not exist"问题
-                2. 当 neo4j 工具无法查询到结果时，用于执行SQL语句查询Mysql数据库
+                2. 当 neo4j 工具无法查询到结果时，用mysql_tool执行SQL语句查询Mysql数据库
                     - 所查询的数据库为医疗系统相关数据库
                     - 必须先通过 `SHOW TABLES` 查看数据库的所有表名
                     - 必须先通过 `DESCRIBE 表名` 查看表的结构

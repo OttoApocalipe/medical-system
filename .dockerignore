@@ -1,0 +1,61 @@
+# ------------ 基础忽略 ------------
+# 版本控制相关
+.git/
+.gitignore
+
+# 构建/缓存目录
+build/
+dist/
+*.egg-info/
+.eggs/
+*.whl
+pip-wheel-metadata/
+
+# 日志和数据库文件
+*.log
+*.sql
+*.sqlite
+*.db
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+
+# ------------ 开发环境相关 ------------
+# IDE 配置
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+out/
+
+# Python 缓存和字节码
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# 虚拟环境（镜像内会重新安装依赖）
+venv/
+env/
+ENV/
+.venv/
+
+# 环境变量文件（可能包含敏感信息）
+.env
+
+# ------------ 项目特定 ------------
+# 测试目录（如果不需要在镜像中运行测试）
+test/
+
+# 本地生成的会话/缓存数据（镜像内会重新生成）
+*.session
+*.cache
+
+# Docker 相关（避免递归包含）
+Dockerfile
+.dockerignore

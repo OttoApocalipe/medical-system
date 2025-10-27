@@ -1,7 +1,13 @@
 from pydantic import BaseModel, Field
 from langchain.tools import tool
 from fastmcp import Client
+from dotenv import load_dotenv
 import asyncio
+import os
+
+# 加载环境变量
+load_dotenv()
+mcp_url = os.getenv("MCP_URL")
 
 
 class Neo4jArgs(BaseModel):
@@ -16,7 +22,7 @@ def neo4j_tool(cypher: str) -> str:
     :param cypher: Cypher查询语句
     """
     async def run():
-        async with Client("http://localhost:8001/sse") as sse:
+        async with Client(mcp_url) as sse:
             res = await sse.call_tool("neo4j_tool", {"cypher": cypher})
             return res
     return asyncio.run(run())

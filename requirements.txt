@@ -1,0 +1,44 @@
+# 核心Web框架
+fastapi==0.116.1
+uvicorn==0.35.0
+starlette==0.47.3
+
+# 认证与安全
+python-jose==3.5.0
+passlib==1.7.4
+python-multipart==0.0.20
+
+# 数据存储与缓存
+mysql-connector-python==9.4.0
+redis==6.4.0
+neo4j==5.28.2
+
+# 环境配置
+python-dotenv==1.1.1
+
+# 大语言模型与工具链
+langchain==0.3.27
+langchain-core==0.3.76
+langchain-openai==0.3.33
+langchain-huggingface==0.3.1
+langchain-neo4j==0.5.0
+langchain-community==0.3.29
+
+# 工具调用与类型校验
+pydantic==2.11.9
+pydantic-settings==2.10.1
+fastmcp==2.12.4
+
+# 异步与网络
+aiohttp==3.12.15
+httpx==0.28.1
+sse-starlette==3.0.2
+
+# 数据处理
+numpy==2.2.6
+pandas==2.3.2
+python-dateutil==2.9.0.post0
+pytz==2025.2
+
+# 其他依赖
+json5==0.9.25  # 历史记录JSON处理
